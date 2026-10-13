@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>스테이지핸드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Serif+KR:wght@400;900&display=swap">
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{display:grid;grid-template-columns:clamp(320px,24vw,440px) 1fr;background:#161513;color:#ece6d8;font:14px/1.5 'Pretendard Variable',Pretendard,sans-serif;overflow:hidden}
+button,select{font:inherit;color:inherit;background:#2a2825;border:1px solid #3a3733;border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:#ece6d8}
+button.go{background:#ff5a1f;border-color:#ff5a1f;color:#1d0b03;font-weight:800}
+#side{display:flex;flex-direction:column;border-right:1px solid #3a3733;min-height:0}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #3a3733}
+.bar b{font:400 22px 'Black Han Sans',sans-serif}
+#src{flex:1;resize:none;border:0;outline:0;background:#201e1c;color:#ece6d8;padding:16px;font:14px/1.8 ui-monospace,Menlo,Consolas,'Pretendard Variable',monospace}
+.hint{padding:10px 16px;border-top:1px solid #3a3733;font-size:12px;color:#9a9385;line-height:1.7}
+.hint code{color:#ffb08a}
+#main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.tools{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid #3a3733;flex-wrap:wrap}
+.tools label{display:flex;gap:6px;align-items:center;font-size:12.5px;color:#cfc8b9}
+.tools input[type=color]{width:30px;height:28px;border:0;background:none;padding:0}
+.tools input[type=range]{accent-color:#ff5a1f;width:90px}
+.sp{flex:1}
+#wrap{flex:1;position:relative;min-height:0;overflow:hidden;background:radial-gradient(circle at 50% 30%,#2b2926,#131211 75%)}
+#stage{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--font);box-shadow:0 40px 80px -30px #000}
+.slide{position:absolute;inset:0;padding:80px 100px 60px;display:flex;flex-direction:column;--u:calc(var(--fs)*var(--fit,1));font-size:calc(var(--u)*30px);line-height:1.45;word-break:keep-all;overflow-wrap:anywhere}
+.slide.in{animation:in .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes in{from{opacity:0;transform:translateY(24px)}}
+.c{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.center .c{align-items:center;text-align:center}
+.pg{flex:none;display:flex;justify-content:space-between;font:600 16px ui-monospace,monospace;letter-spacing:.12em;opacity:.55;padding-top:16px}
+.bar2{width:200px;height:4px;background:color-mix(in srgb,var(--fg) 20%,transparent);position:relative;align-self:center}
+.bar2 i{position:absolute;inset:0 auto 0 0;background:var(--ac)}
+h1,h2,blockquote,.num{font-weight:900;letter-spacing:-.03em}
+h1{font-size:calc(var(--u)*140px);line-height:1.05}
+h2{font-size:calc(var(--u)*70px);line-height:1.15;margin-bottom:.6em}
+h1::after{content:'';display:block;width:120px;height:8px;background:var(--ac);margin-top:.3em}
+.center h1::after{margin-left:auto;margin-right:auto}
+.sub{font-size:calc(var(--u)*36px);opacity:.65;margin-top:.5em}
+b{color:var(--ac);font-weight:inherit}
+ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:.7em}
+li{font-size:calc(var(--u)*40px);line-height:1.35;display:flex;gap:.55em;align-items:baseline}
+li::before{content:'';flex:none;width:.32em;height:.32em;background:var(--ac);transform:translateY(-.08em)}
+blockquote{font-size:calc(var(--u)*68px);line-height:1.25;max-width:1250px}
+blockquote::before{content:'“';display:block;font-size:2.4em;line-height:.6;height:.5em;color:var(--ac)}
+.stats{display:flex;gap:56px;width:100%}
+.stats>div{flex:1;border-top:4px solid var(--fg);padding-top:20px}
+.num{font-size:calc(var(--u)*140px);line-height:1;color:var(--ac);white-space:nowrap}
+.stats p{font-size:calc(var(--u)*28px);opacity:.7;margin-top:12px}
+.empty{position:absolute;inset:0;display:grid;place-items:center;font-size:40px;opacity:.4}
+body.present{display:block}
+body.present #side,body.present .tools{display:none}
+body.present #main{position:fixed;inset:0;background:#000;z-index:10}
+body.present #stage{box-shadow:none}
+</style>
+</head>
+<body>
+<aside id="side">
+  <div class="bar"><b>스테이지핸드</b><button id="sample">샘플</button></div>
+  <textarea id="src" spellcheck="false" placeholder="여기에 발표 대본을 입력하세요"></textarea>
+  <div class="hint">
+    <code># 제목</code> 새 슬라이드 · <code>## 부제</code><br>
+    <code>- 항목</code> 불릿 · <code>&gt; 문장 — 출처</code> 인용<br>
+    <code>@stat 87% | 설명</code> 숫자 · <code>**강조**</code><br>
+    # 없이 빈 줄로만 나눠도 슬라이드가 나뉩니다.
+  </div>
+</aside>
+<main id="main">
+  <div class="tools">
+    <select id="theme"><option value="news">신문</option><option value="night">야간</option><option value="plain">화이트</option><option value="warm">웜톤</option></select>
+    <select id="font"><option value="sans">고딕</option><option value="serif">명조</option><option value="han">굵은 제목체</option></select>
+    <label>크기<input type="range" id="size" min="70" max="130"></label>
+    <label>색<input type="color" id="ac"></label>
+    <label><input type="checkbox" id="center">중앙</label>
+    <span class="sp"></span>
+    <button id="prev">←</button><span id="count">0 / 0</span><button id="next">→</button>
+    <button class="go" id="go">▶ 발표</button>
+  </div>
+  <div id="wrap"><div id="stage"></div></div>
+</main>
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const fmt=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+const THEMES={news:{bg:'#efe8d8',fg:'#151412',ac:'#e5361b'},night:{bg:'#0a0a14',fg:'#f2f0ff',ac:'#b8ff3d'},plain:{bg:'#ffffff',fg:'#111111',ac:'#1f4fd8'},warm:{bg:'#ecd6c6',fg:'#341d14',ac:'#d84a2b'}};
+const FONTS={sans:"'Pretendard Variable',Pretendard,'Noto Sans KR',sans-serif",serif:"'Noto Serif KR',serif",han:"'Black Han Sans','Pretendard Variable',sans-serif"};
+const SAMPLE=`# 2027 신사업 전략
+## 일하는 방식을 다시 설계하다
+기획본부 · 김서연
+
+# 시장은 이미 움직였다
+@stat 87% | 올해 AI 도입을 계획한 기업
+@stat 3.2배 | 도입 기업의 문서 생산성
+@stat 14일 | 보고서 1건 평균 소요
+
+# 우리가 겪는 문제
+- 슬라이드 한 장에 평균 **3시간**
+- 부서마다 다른 폰트, 다른 색
+- 최신 수치를 사람이 직접 복사
+- 검토는 메일 첨부로 왔다 갔다
+
+> 디자인은 장식이 아니라, 메시지가 도착하는 방식이다. — 디자인팀장
+
+# 감사합니다
+## 질문은 언제든 환영합니다
+`;
+let slides=[],idx=0,cfg={theme:'news',font:'sans',size:100,ac:null,center:false};
+const src=$('#src'),stage=$('#stage'),wrap=$('#wrap');
+
+function parse(t){
+  const out=[],hash=/^#\s/m.test(t);let c=null;
+  t.replace(/\r/g,'').split('\n').forEach((raw,ln)=>{
+    const l=raw.trim();
+    if(!l){if(!hash||(c&&(c.items.length||c.stats.length||c.quote)))c=null;return}
+    if(/^#\s/.test(l)||!c){c={title:'',sub:'',items:[],quote:'',by:'',stats:[],paras:[],line:ln};out.push(c)}
+    let m;
+    if(/^#\s/.test(l))c.title=l.slice(2);
+    else if(/^##\s/.test(l))c.sub=l.slice(3);
+    else if((m=l.match(/^[-*]\s+(.*)/)))c.items.push(m[1]);
+    else if((m=l.match(/^>\s*(.*)/))){const p=m[1].split(/\s+[—–]\s+/);c.quote+=p[0];if(p[1])c.by=p[1]}
+    else if((m=l.match(/^@stat\s+(.+?)\s*\|\s*(.*)/)))c.stats.push([m[1],m[2]]);
+    else if(!c.title)c.title=l;
+    else c.paras.push(l);
+  });
+  return out;
+}
+function body(s,i){
+  const t=fmt(s.title),sub=s.sub?`<p class="sub">${fmt(s.sub)}</p>`:'',ps=s.paras.map(p=>`<p class="sub">${fmt(p)}</p>`).join('');
+  if(s.stats.length)return`<h2>${t}</h2><div class="stats">${s.stats.map(([v,l])=>`<div><div class="num">${esc(v)}</div><p>${fmt(l)}</p></div>`).join('')}</div>`;
+  if(s.quote)return`<blockquote>${fmt(s.quote)}</blockquote>${s.by?`<p class="sub">— ${fmt(s.by)}</p>`:''}`;
+  if(s.items.length)return`<h2>${t}</h2>${sub}<ul>${s.items.map(x=>`<li><span>${fmt(x)}</span></li>`).join('')}</ul>`;
+  return`<h1>${t}</h1>${sub}${ps}`;
+}
+function fit(el){
+  const c=el.querySelector('.c');let f=1;
+  el.style.setProperty('--fit',1);
+  while(f>.5&&c.scrollHeight>c.clientHeight+2){f-=.05;el.style.setProperty('--fit',f.toFixed(2))}
+}
+function render(anim){
+  const th=THEMES[cfg.theme];
+  stage.style.setProperty('--bg',th.bg);stage.style.setProperty('--fg',th.fg);
+  stage.style.setProperty('--ac',cfg.ac||th.ac);stage.style.setProperty('--font',FONTS[cfg.font]);
+  stage.style.setProperty('--fs',cfg.size/100);
+  stage.className=cfg.center?'center':'';
+  if(!slides.length){stage.innerHTML='<div class="empty">대본을 입력하세요</div>';$('#count').textContent='0 / 0';return}
+  idx=Math.max(0,Math.min(idx,slides.length-1));
+  const n=slides.length;
+  stage.innerHTML=`<div class="slide${anim?' in':''}"><div class="c">${body(slides[idx],idx)}</div><div class="pg"><span class="bar2"><i style="width:${(idx+1)/n*100}%"></i></span><span>${String(idx+1).padStart(2,'0')} / ${String(n).padStart(2,'0')}</span></div></div>`;
+  fit(stage.firstChild);
+  $('#count').textContent=`${idx+1} / ${n}`;
+  $('#prev').disabled=idx===0;$('#next').disabled=idx===n-1;
+}
+function update(){slides=parse(src.value);const ln=src.value.slice(0,src.selectionStart).split('\n').length-1;idx=0;slides.forEach((s,i)=>{if(s.line<=ln)idx=i});render();save()}
+function go(n){if(n<0||n>=slides.length||n===idx)return;idx=n;render(true)}
+function scale(){
+  const r=wrap.getBoundingClientRect(),pad=document.body.classList.contains('present')?0:24;
+  const k=Math.min((r.width-pad*2)/1600,(r.height-pad*2)/900);
+  stage.style.transform=`translate(${(r.width-1600*k)/2}px,${(r.height-900*k)/2}px) scale(${k})`;
+}
+function save(){try{localStorage.setItem('sh.min',JSON.stringify({t:src.value,cfg}))}catch(e){}}
+function syncTools(){
+  $('#theme').value=cfg.theme;$('#font').value=cfg.font;$('#size').value=cfg.size;
+  $('#ac').value=cfg.ac||THEMES[cfg.theme].ac;$('#center').checked=cfg.center;
+}
+
+src.addEventListener('input',update);
+src.addEventListener('click',()=>{const ln=src.value.slice(0,src.selectionStart).split('\n').length-1;let k=0;slides.forEach((s,i)=>{if(s.line<=ln)k=i});go(k)});
+$('#sample').onclick=()=>{src.value=SAMPLE;src.setSelectionRange(0,0);update()};
+$('#theme').onchange=e=>{cfg.theme=e.target.value;cfg.ac=null;syncTools();render();save()};
+$('#font').onchange=e=>{cfg.font=e.target.value;render();save()};
+$('#size').oninput=e=>{cfg.size=+e.target.value;render();save()};
+$('#ac').oninput=e=>{cfg.ac=e.target.value;render();save()};
+$('#center').onchange=e=>{cfg.center=e.target.checked;render();save()};
+$('#prev').onclick=()=>go(idx-1);
+$('#next').onclick=()=>go(idx+1);
+$('#go').onclick=()=>{document.body.classList.add('present');document.documentElement.requestFullscreen?.().catch(()=>{});setTimeout(scale,60)};
+function stop(){document.body.classList.remove('present');if(document.fullscreenElement)document.exitFullscreen?.().catch(()=>{});setTimeout(scale,60)}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('present'))stop();else setTimeout(scale,80)});
+wrap.addEventListener('click',()=>{if(document.body.classList.contains('present'))go(idx+1)});
+addEventListener('keydown',e=>{
+  const present=document.body.classList.contains('present');
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();$('#go').click();return}
+  if(e.key==='Escape'&&present){stop();return}
+  if(!present&&!(e.altKey&&e.key.startsWith('Arrow')))if(/^(TEXTAREA|INPUT|SELECT)$/.test(e.target.tagName))return;
+  if([' ','ArrowRight','ArrowDown','PageDown'].includes(e.key)){e.preventDefault();go(idx+1)}
+  else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(idx-1)}
+});
+new ResizeObserver(scale).observe(wrap);
+
+let saved=null;try{saved=JSON.parse(localStorage.getItem('sh.min')||'null')}catch(e){}
+if(saved&&saved.cfg&&THEMES[saved.cfg.theme]&&FONTS[saved.cfg.font])cfg=Object.assign(cfg,saved.cfg);
+src.value=saved&&typeof saved.t==='string'?saved.t:SAMPLE;
+syncTools();scale();update();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>render());
+})();
+</script>
+</body>
+</html>
