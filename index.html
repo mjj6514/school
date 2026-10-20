@@ -89,14 +89,14 @@ const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const fmt=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
 const THEMES={news:{bg:'#efe8d8',fg:'#151412',ac:'#e5361b'},night:{bg:'#0a0a14',fg:'#f2f0ff',ac:'#b8ff3d'},plain:{bg:'#ffffff',fg:'#111111',ac:'#1f4fd8'},warm:{bg:'#ecd6c6',fg:'#341d14',ac:'#d84a2b'}};
 const FONTS={sans:"'Pretendard Variable',Pretendard,'Noto Sans KR',sans-serif",serif:"'Noto Serif KR',serif",han:"'Black Han Sans','Pretendard Variable',sans-serif"};
-const SAMPLE=`# 2027 신사업 전략
+const SAMPLE=`# 기업 프레젠테이션 샘플 
 ## 안녕하세요
 기획본부 · 유시우
 
 # 유시우
 @stat 147 | 아이큐
 @stat 3.2배 | 근동이에 비해
-@stat 14일 | 태어나고 한글은 뗸지
+@stat 14일 | 태어나고 한글은 뗀지
 
 # 이승기
 - 너무 말랐다 **20kg**
